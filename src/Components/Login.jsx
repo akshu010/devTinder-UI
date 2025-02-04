@@ -4,26 +4,40 @@ import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
 import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/constants";
+import { checkValidData } from "../utils/validate";
 
 const Login = () => {
   const [emailId, setEmail] = useState("akshay@gmail.com");
   const [password, setPassword] = useState("Akshay@001");
+  const [errorMessage, setErrorMessage] = useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const hadleLoginIn = async () => {
-    const res = await axios.post(
-      BASE_URL + "/login",
-      {
-        emailId,
-        password,
-      },
-      { withCredentials: true }
-    );
-    dispatch(addUser(res.data));
-    return navigate("/");
+
+  const handleValidation = () => {
+    const message = checkValidData(emailId, password); 
+    setErrorMessage(message);
+    return message === null; 
   };
+
+  const handleLoginIn = async () => {
+    if (!handleValidation()) return; 
+
+    try {
+      const res = await axios.post(
+        BASE_URL + "/login",
+        { emailId, password },
+        { withCredentials: true }
+      );
+      dispatch(addUser(res.data));
+      navigate("/");
+    } catch (err) {
+      setErrorMessage("Invalid email or password"); 
+      console.log(err);
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-base-200">
+    <div className="min-h-screen  flex items-center justify-center bg-base-200">
       <div className="card bg-base-100 w-96 shadow-xl p-8">
         <h2 className="text-2xl font-bold text-center mb-6">Welcome Back</h2>
 
@@ -54,16 +68,15 @@ const Login = () => {
             />
           </div>
 
+          {errorMessage && <p className="text-red-500">{errorMessage}</p>}
+
           <div className="text-sm mt-2">
             <a href="#" className="link link-hover">
               Forgot password?
             </a>
           </div>
 
-          <button
-            onClick={hadleLoginIn}
-            className="btn btn-primary w-full mt-4"
-          >
+          <button onClick={handleLoginIn} className="btn btn-primary w-full mt-4">
             Sign In
           </button>
 
