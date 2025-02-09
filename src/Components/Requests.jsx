@@ -1,13 +1,12 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { BASE_URL } from "../utils/constants";
 import { useDispatch, useSelector } from "react-redux";
-import { addRequests } from "../utils/requestSlice";
+import { addRequests, removeRequest } from "../utils/requestSlice";
 
 const Requests = () => {
   const dispatch = useDispatch();
   const requests = useSelector((store) => store.requests);
-  const [isLoading, setIsLoading] = useState(true);
 
   const getRequests = async () => {
     try {
@@ -18,17 +17,33 @@ const Requests = () => {
       dispatch(addRequests(res?.data?.data));
     } catch (error) {
       console.error("Error fetching requests:", error);
-    } finally {
-      setIsLoading(false);
+    }
+  };
+  const handleClick = async (status, _id) => {
+    try {
+      await axios.post(
+        BASE_URL + "/request/review/" + status + "/" + _id,
+        {},
+        { withCredentials: true }
+      );
+      dispatch(removeRequest(_id));
+    } catch (error) {
+      console.error("Error fetching requests:", error);
     }
   };
   useEffect(() => {
     getRequests();
   }, []);
   if (!requests) return null;
-  if (requests.length === 0) return <h1 className="text-white">No Connection Requests found</h1>;
+  if (requests.length === 0)
+    return (
+      <h1 className=" pt-10 flex items-center justify-center text-3xl text-red-400">
+        {" "}
+        Ohh! No Connection Requests found😔
+      </h1>
+    );
   return (
-    <div className="container mx-auto p-4 bg-gray-900 min-h-screen">
+    <div className="container mx-auto p-4 bg-gray-900 h-content">
       <h1 className="text-3xl font-bold text-center text-white mb-8 p-6">
         Connection Requests
       </h1>
@@ -67,13 +82,13 @@ const Requests = () => {
               <p className="text-center text-gray-300 mb-6">{about}</p>
               <div className="flex justify-center space-x-4">
                 <button
-                  // onClick={() => handleAccept(request._id)}
+                  onClick={() => handleClick("accepted", request._id)}
                   className=" cursor-pointer bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-all duration-300"
                 >
                   Accept
                 </button>
                 <button
-                  // onClick={() => handleReject(request._id)}
+                  onClick={() => handleClick("rejected", request._id)}
                   className=" cursor-pointer bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-all duration-300"
                 >
                   Reject
