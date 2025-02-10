@@ -2,15 +2,15 @@ import axios from "axios";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { addUser } from "../utils/userSlice";
-import {  useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { BASE_URL } from "../utils/constants";
 import { checkValidData } from "../utils/validate";
 
 const Login = () => {
-  const [emailId, setEmail] = useState("akshay@gmail.com");
-  const [password, setPassword] = useState("Akshay@001");
+  const [emailId, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [firstName, setFirstName] = useState("");
-  const [isLoginForm, setIsLoginForm] = useState(false);
+  const [isLoginForm, setIsLoginForm] = useState(true);
   const [lastName, setLastName] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
   const dispatch = useDispatch();
@@ -46,7 +46,7 @@ const Login = () => {
       { firstName, lastName, emailId, password },
       { withCredentials: true }
     );
-    dispatch(addUser(res.data));
+    dispatch(addUser(res?.data?.data));
     navigate("/profile");
   };
 
@@ -113,14 +113,6 @@ const Login = () => {
           </div>
 
           {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-
-          {isLoginForm && (
-            <div className="text-sm mt-2">
-              <a href="#" className="link link-hover">
-                Forgot password?
-              </a>
-            </div>
-          )}
 
           <button
             onClick={isLoginForm ? handleLoginIn : handleSignUp}
